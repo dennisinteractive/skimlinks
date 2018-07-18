@@ -51,7 +51,7 @@ function skimlinks_cron() {
 
   $end = time() + (int) variable_get('skimlinks_cron_process_time', 60);
   $expired_domains = skimlinks_get_expired_domains_query();
-  while (time() < $end && ($item = $expired_domains->fetchObject())) {
+  while (time() < $end && _skimlinks_within_api_rate_limit() && ($item = $expired_domains->fetchObject())) {
     try {
       skimlinks_validate_merchant($item->domain);
     }
@@ -64,6 +64,30 @@ function skimlinks_cron() {
       }
     }
   }
+}
+
+/**
+ * Check that rate limit hasn't been reached.
+ *
+ * @return bool
+ */
+function _skimlinks_within_api_rate_limit() {
+  $time_start = &drupal_static(__FUNCTION__ . '_time_start', time());
+  $lookups = &drupal_static(__FUNCTION__ . '_lookups', 0);
+
+  # Reset lookups each minute.
+  if ((time() - $time_start) >= 60) {
+    $time_start = time();
+    $lookups = 0;
+  }
+
+  # Return FALSE if we have hit the API limit, which is
+  # 40 requests per min per API key.
+  if ($lookups++ >= 40) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
