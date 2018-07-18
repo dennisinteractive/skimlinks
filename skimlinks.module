@@ -56,7 +56,12 @@ function skimlinks_cron() {
       skimlinks_validate_merchant($item->domain);
     }
     catch (Exception $e) {
-      watchdog_exception('skimlinks', $e);
+      watchdog('skimlinks', $e->getMessage());
+      // Stop processing if we have hit the API limit.
+      // Continue processing if the request failed for any other reason.
+      if ($e->getCode() === 406) {
+        break;
+      }
     }
   }
 }
@@ -464,7 +469,7 @@ function _skimlinks_entity_update_known_domains($entity) {
                 skimlinks_validate_merchant($domain, 5);
               }
               catch (Exception $e) {
-                watchdog_exception('skimlinks', $e);
+                watchdog('skimlinks', $e->getMessage());
               }
             }
           }
@@ -517,11 +522,25 @@ function skimlinks_merchant_api_call($domain, $timeout = 10) {
   curl_setopt($ch, CURLOPT_URL, "$api_endpoint?$query");
 
   $result = curl_exec($ch);
-  $error = curl_error($ch) . ' - Domain: ' . $domain;
-  curl_close($ch);
+  $response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
   if($result === FALSE) {
-    throw new Exception($error);
+    $error_message = t('!curl_error - Domain: !domain', array(
+      '!curl_error' => curl_error($ch),
+      '!domain' => $domain,
+    ));
+  }
+  elseif ($response_code !== 200) {
+    $error_message = t('!code status code returned checking domain: !domain', array(
+      '!code' => $response_code,
+      '!domain' => $domain,
+    ));
+  }
+
+  curl_close($ch);
+
+  if (!empty($error_message)) {
+    throw new Exception($error_message, $response_code);
   }
 
   return json_decode($result);
