@@ -650,12 +650,26 @@ function skimlinks_known_domains_update($domain, $valid = NULL) {
     ))
     ->execute();
 
-  // Clear cache so that it will be checked again.
-  $cid = _skimlinks_domain_exists_cid($domain);
-  cache_clear_all($cid, 'cache', TRUE);
-  drupal_static_reset($cid);
+  _skimlinks_clear_domain_cache($domain);
 
   return TRUE;
+}
+
+/**
+ * Clear the cache for the provided domain.
+ *
+ * @param $domain
+ */
+function _skimlinks_clear_domain_cache($domain) {
+  // Clear cache so that it will be checked again.
+  $cids = array(
+    _skimlinks_domain_exists_cid($domain),
+    _skimlinks_domain_allowed_cid($domain),
+  );
+  foreach ($cids as $cid) {
+    cache_clear_all($cid, 'cache', TRUE);
+    drupal_static_reset($cid);
+  }
 }
 
 /**
