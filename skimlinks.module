@@ -56,7 +56,7 @@ function skimlinks_cron() {
       skimlinks_validate_merchant($item->domain);
     }
     catch (Exception $e) {
-      watchdog_exception('skimlinks', $e->getMessage());
+      watchdog_exception('skimlinks', $e);
     }
   }
 }
@@ -464,7 +464,7 @@ function _skimlinks_entity_update_known_domains($entity) {
                 skimlinks_validate_merchant($domain, 5);
               }
               catch (Exception $e) {
-                watchdog_exception('skimlinks', $e->getMessage());
+                watchdog_exception('skimlinks', $e);
               }
             }
           }
@@ -499,6 +499,7 @@ function skimlinks_validate_merchant($domain, $timeout = 10) {
  */
 function skimlinks_merchant_api_call($domain, $timeout = 10) {
   $api_endpoint = check_plain(variable_get('skimlinks_merchant_api_endpoint'));
+
   $parameters = array(
     'apikey' => check_plain(variable_get('skimlinks_merchant_api_key')),
     'account_id' => check_plain(variable_get('skimlinks_merchant_api_account_id')),
@@ -516,10 +517,11 @@ function skimlinks_merchant_api_call($domain, $timeout = 10) {
   curl_setopt($ch, CURLOPT_URL, "$api_endpoint?$query");
 
   $result = curl_exec($ch);
+  $error = curl_error($ch) . ' - Domain: ' . $domain;
   curl_close($ch);
 
   if($result === FALSE) {
-    throw new Exception(curl_error($ch) . ' - Domain: ' . $domain);
+    throw new Exception($error);
   }
 
   return json_decode($result);
