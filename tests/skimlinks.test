@@ -141,7 +141,7 @@ class SkimlinksDirectTest extends DrupalWebTestCase {
     $this->assertText(t('@type @title has been created.', array('@type' => 'Basic page', '@title' => $edit['title'])), 'Node was created.');
 
     // Check that external links are using the wrapper.
-    $this->assertRaw('href="http://go.redirectingat.com/?id=12345X1234567&amp;url=http%3A//jcpenney.com&amp;xcust=1&amp;sref=');
+    $this->assertRaw('href="//go.redirectingat.com/?id=12345X1234567&amp;url=http%3A//jcpenney.com&amp;xcust=1&amp;sref=');
     $this->assertPattern("|<a.*?href=.*?go\.redirectingat\.com.*?sref=" . drupal_encode_path($base_url) . "/node/1|");
 
     // Check that internal links are not changed.

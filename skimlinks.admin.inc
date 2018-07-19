@@ -44,7 +44,7 @@ function skimlinks_admin_settings_form($form_state) {
     '#type' => 'textfield',
     '#default_value' => variable_get('skimlinks_subdomain', 'go.redirectingat.com'),
     '#description' => t(
-      'You may use a custom subdomain to redirect your affiliate links rather than the default go.redirectingat.com. Please include the http:// or https://. Visit the !settings page for more details.',
+      'You may use a custom subdomain to redirect your affiliate links rather than the default go.redirectingat.com. Visit the !settings page for more details.',
       array(
         '!settings' => l(t('Skimlinks Advanced Settings'), 'https://hub.skimlinks.com/setup/settings', array('attributes' => array('target' => ' _blank')))
       )
@@ -177,12 +177,8 @@ function skimlinks_admin_settings_form($form_state) {
  */
 function skimlinks_admin_settings_form_validate($form, &$form_state) {
 
-  $publisher_id = &$form_state['values']['skimlinks_publisherid'];
-
-  // Trim whitespace
-  $publisher_id = trim($publisher_id);
-
-  // Ensure the skimlinks account consist of only numbers and letters
+  $publisher_id = trim(check_plain($form_state['values']['skimlinks_publisherid']));
+  // Ensure the skimlinks account consists of only numbers and letters.
   if (!preg_match('/^[a-zA-Z0-9]*$/', $publisher_id)) {
     form_set_error('skimlinks_publisherid', 'A valid Domain ID should have the following format: 000000X000000');
 
@@ -190,29 +186,17 @@ function skimlinks_admin_settings_form_validate($form, &$form_state) {
   }
 
   if ($form_state['values']['skimlinks_subdomain']) {
-    $subdomain = &$form_state['values']['skimlinks_subdomain'];
-
-    // Trim whitespace
-    $subdomain = trim($subdomain);
-
-    // Check the user has included the URL schema in the subdomain value.
-    $valid_url = FALSE;
-    foreach (array('http://', 'https://') as $protocol) {
-      if (substr($subdomain, 0, strlen($protocol)) === $protocol) {
-        $valid_url = TRUE;
-        break;
-      }
-    }
-    if (!$valid_url) {
-      form_set_error('skimlinks_subdomain', t('Your custom redirection sub-domain is not a valid URL. Please include the http:// or https://'));
-    }
+    $subdomain = trim(check_plain($form_state['values']['skimlinks_subdomain']));
 
     // Validate the provided sub domain by comparing the Skimlinks default response with the new subdomain response
     $standard_url = 'https://go.redirectingat.com/check/domain_check.html';
     $cnamecheck_url = $subdomain . '/check/domain_check.html';
     $original = drupal_http_request($standard_url);
     $new = drupal_http_request($cnamecheck_url);
-
+    debug($standard_url);
+    debug($original->data);
+    debug($cnamecheck_url);
+    debug($new->data);
     if (empty($new->data) || $original->data !== $new->data) {
       form_set_error('skimlinks_subdomain', t('Your custom redirection sub-domain is not currently pointing at Skimlinks servers.'));
     }

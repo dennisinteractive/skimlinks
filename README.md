@@ -15,8 +15,7 @@ Configuration
 Go to /admin/config/services/skimlinks
 
 Fill in the form with your Domain Id
-The custom redirect subdomain should start with http/https
-i.e. http://go.redirectingat.com
+i.e. go.redirectingat.com
 
 Choose if you want to use the Client side or Server side implementation.
 
