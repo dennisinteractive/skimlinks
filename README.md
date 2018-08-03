@@ -40,3 +40,11 @@ you save a node or when cron runs.
 
 The blacklist is a global option that will avoid changing any link that points
 to a domain in the list.
+
+Testing
+=======
+How to check the Skimlinks code is installed properly?
+The best way to test whether your Skimlinks installation is working on your
+site is to create a link to http://test.skimlinks.com.
+
+See https://support.skimlinks.com/hc/en-us/articles/223835608-How-to-check-the-Skimlinks-code-is-installed-properly-

@@ -85,7 +85,7 @@ class SkimlinksDirectTest extends DrupalWebTestCase {
     $this->assertEqual($value, '0');
 
     $this->drupalGet('/');
-    $this->assertRaw('var skimlinks_domain = "//go.redirectingat.com"');
+    $this->assertRaw('var skimlinks_domain = "go.redirectingat.com"');
     $this->assertRaw('<script type="text/javascript" src="//s.skimresources.com/js/12345X1234567.skimlinks.js"></script>');
 
     // Test server side.
@@ -125,7 +125,7 @@ class SkimlinksDirectTest extends DrupalWebTestCase {
 
     $this->drupalGet('/');
     $this->assertNoRaw('var skimlinks_domain');
-    $this->assertNoRaw('http://s.skimresources.com/js/12345X1234567.skimlinks.js');
+    $this->assertNoRaw('s.skimresources.com/js/12345X1234567.skimlinks.js');
 
     // Insert a domain into the known domains. This was done to bypass the query to the merchant api endpoint as it needs real api key to work.
     skimlinks_known_domains_update('jcpenney.com', TRUE);
@@ -144,9 +144,8 @@ class SkimlinksDirectTest extends DrupalWebTestCase {
     $this->drupalPost('node/add/page', $edit, t('Save'));
     $this->assertText(t('@type @title has been created.', array('@type' => 'Basic page', '@title' => $edit['title'])), 'Node was created.');
 
-
     // Check that external links are using the wrapper.
-    $this->assertRaw('href="//go.redirectingat.com/?id=12345X1234567&amp;url=http%3A//jcpenney.com&amp;xcust=1&amp;sref=');
+    $this->assertRaw('href="https://go.redirectingat.com/?id=12345X1234567&amp;url=http%3A//jcpenney.com&amp;xcust=1&amp;sref=');
     $this->assertPattern("|<a.*?href=.*?go\.redirectingat\.com.*?sref=" . drupal_encode_path($base_url) . "/node/1|");
 
     // Check that internal links are not changed.
