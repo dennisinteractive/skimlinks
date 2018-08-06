@@ -55,7 +55,7 @@ class SkimlinksDirectTest extends DrupalWebTestCase {
 
     // Enable clean urls.
     variable_set('clean_url', TRUE);
-    variable_set('skimlinks_update_known_domains_on_entity_update', 1);
+    variable_set('skimlinks_update_known_domains_on_entity_update', 0);
   }
 
   /**
